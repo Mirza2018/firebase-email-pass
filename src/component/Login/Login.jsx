@@ -1,11 +1,15 @@
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
-import React, { useState } from 'react';
+import { getAuth, sendPasswordResetEmail, signInWithEmailAndPassword } from 'firebase/auth';
+import React, { useRef, useState } from 'react';
 import { app } from '../../firebase/firebase';
 import { Link } from 'react-router-dom';
 
 const Login = () => {
+
+
     const [error, setError] = useState('');
     const [sucess, setSucess] = useState('');
+
+    const emailRef = useRef()
 
     const auth = getAuth(app)
     const handelSubmit = (event) => {
@@ -20,7 +24,7 @@ const Login = () => {
                 console.log(loggedUser);
                 setError('')
                 event.target.reset()
-                setSucess('user is create Account sucessfully')
+               
             })
             .catch(error => {
                 console.warn(error.message);
@@ -28,6 +32,22 @@ const Login = () => {
             })
     }
 
+    const handlaForgotPass = () => {
+        const email = emailRef.current.value;
+        if (!email) {
+            alert('Please give a valid email')
+            return;
+        }
+        sendPasswordResetEmail(auth, email)
+            .then((result) => {
+                alert('Please check your email!!')
+            })
+            .catch((error) => {
+
+                const errorMessage = error.message;
+                console.log(errorMessage);
+            });
+    }
 
 
     return (
@@ -37,15 +57,18 @@ const Login = () => {
             {error && <p>{error}</p>}
             {sucess && <p>{sucess}</p>}
             <form onSubmit={handelSubmit}>
-                <input name='email' type="email" placeholder='Your Email' required />
+                <input name='email' type="email" placeholder='Your Email' ref={emailRef} required />
                 <br />
                 <input name='password' type="password" placeholder='Your Password' required />
                 <br />
                 <input type="submit" value='register' />
             </form>
+            <p>Forgot password!!
+                <button onClick={handlaForgotPass} > Reset Password </button>
+            </p>
 
             <small><p>Don't have any account? please <Link to='/register'> Register</Link></p></small>
-        </div>
+        </div >
     );
 };
 
